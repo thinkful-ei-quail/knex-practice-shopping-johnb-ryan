@@ -116,7 +116,7 @@ describe(`Articles service object`, function () {
       });
     });
 
-    it(`insertArticle() inserts a new article and resolvesthe new article with an 'id`, () => {
+    it(`insertArticle() inserts a new article and resolves the new article with an 'id`, () => {
       const newArticle = {
         title: 'Test new title',
         content: 'Test new content',
