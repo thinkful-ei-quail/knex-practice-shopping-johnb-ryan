@@ -1,7 +1,12 @@
 require('dotenv').config();
 const shoppingListService = require('../src/shopping-list-service');
 const knex = require('knex');
+const pg = require('pg'); 
+const ShoppingListService = require('../src/shopping-list-service');
 const { expect } = require('chai');
+const PG_DECIMAL_OID = 1700; 
+pg.types.setTypeParser(PG_DECIMAL_OID, parseFloat);
+
 
 describe.only(`Shopping-list service object`, function () {
   let db;
@@ -51,5 +56,49 @@ describe.only(`Shopping-list service object`, function () {
         expect(actual).to.eql([]);
       });
     });
+
+    it('insertItem() inserts a new item and resolves new item with an "id"', () => {
+      const newItem = {
+        name: 'New Item',
+        price: 10.00,
+        date_added: new Date('2020-08-16T15:41:02.950Z'),
+        checked: false,
+        category: 'Breakfast',
+      }
+      return shoppingListService.insertItem(db, newItem)
+        .then(actual => {
+          expect(actual).to.eql({
+            id: 1,
+            name: newItem.name,
+            price: newItem.price,
+            date_added: newItem.date_added,
+            checked: newItem.checked,
+            category: newItem.category,
+          });
+        });
+    });
   });
+
+  context(`Given 'shopping_list' has data`, () => {
+    
+    beforeEach(() => db.into('shopping_list').insert(testShoppingListItems))
+
+    it('getById() finds an item in the table with a matching id', () => {
+      const thirdId = 3
+      const thirdShoppingListItem = testShoppingListItems[thirdId -1]
+      return shoppingListService.getById(db, thirdId)
+        .then(actual => {
+          expect(actual).to.eql(thirdShoppingListItem)
+        })
+    })
+
+    it('updateItem() updates an item from the shopping list table', () => {
+      const idOfItemToUpdate = 3
+      const newData = {category: 'Breakfast'}
+      return shoppingListService.updateItem(db, idOfItemToUpdate, newData)
+        .then() //getbyid to compare
+
+    }) 
+  })
+
 });
